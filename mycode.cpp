@@ -121,7 +121,8 @@ void pick() {
 	}
 
 	sort(v.begin(), v.end());
-	pair< pair<int,int>, pair<int,int> > ok = v.back();
+	int pivot = rng()%v.size();
+	pair< pair<int,int>, pair<int,int> > ok = v[pivot];
 	int x = ok.second.first, y = ok.second.second, n = ok.first.second;
 
 	print(x,y,n);
