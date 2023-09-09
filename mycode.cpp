@@ -94,49 +94,37 @@ void print(int x,int y,int n) {
 	cout<<endl;
 }
 
-void process(vector<pair<int,int>> v) {
-	int pivot = rng()%v.size();
-	int x = v[pivot].first, y = v[pivot].second;
-	
-	bitset<10> tmp = row[x] & col[y] & box[num[x][y]];
-	
-	set<pair<int,int>> s;
-	
-	for (int n = tmp._Find_first(); n < 10; n = tmp._Find_next(n)) {
-        Move(x, y, n, 0);
-        int cur = solve_sudoku();
-        Move(x, y, n, 1);
-        
-        if(cur == 0) {
-        	continue;
-		}
-        
-        if(cur == 1) {
-        	print(x,y,n);
-        	return;
-		}
-		
-		s.insert({appear[n],n});
-    }
-	
-	pair<int,int> temp = *s.begin();
-	int n = temp.second;
-	print(x,y,n);
-}
-
 void pick() {
-	vector<pair<int,int>> v[4];
+	vector< pair< pair<int,int>, pair<int,int> > > v;
 	for(int i = 0; i < 9; ++i) for(int j = 0; j < 9; ++j)
 	{
 		if(board[i][j]) continue;
-		int cur = (visited_row[i] == 0) + (visited_column[j] == 0) + (visited_group[num[i][j]] == 0);
-		v[cur].emplace_back(i,j);
+
+		bitset<10> tmp = row[i] & col[j] & box[num[i][j]];
+		int occur = 100, number = 0;
+
+		for (int n = tmp._Find_first(); n < 10; n = tmp._Find_next(n))
+			if(appear[n] < occur) {
+				occur = appear[n]; number = n;
+			}
+
+		Move(i,j,number,0);
+		int check = solve_sudoku();
+		Move(i,j,number,1);
+
+		if(check == 0) continue;
+		if(check == 1) {
+			print(i,j,number); return;
+		}
+
+		v.push_back( make_pair( make_pair(occur,number), make_pair(i,j) ) );
 	}
-	
-	if(v[1].size()) process(v[1]);
-	else if(v[2].size()) process(v[2]);
-	else if(v[0].size()) process(v[0]);
-	else process(v[3]);
+
+	sort(v.begin(), v.end());
+	pair< pair<int,int>, pair<int,int> > ok = v.back();
+	int x = ok.second.first, y = ok.second.second, n = ok.first.second;
+
+	print(x,y,n);
 }
 
 signed main() {
